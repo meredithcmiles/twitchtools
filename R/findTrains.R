@@ -3,7 +3,7 @@
 # must contain the stimulation in one channel and the response in another
 # uses the stimulation as basis for extraction
 
-findTrains<-function(wave, l=100){
+findTrains<-function(wave, l=100, names=NULL){
   twitch=wave@left
   samp.rate<-wave@samp.rate
     stim=wave@right
@@ -42,6 +42,10 @@ findTrains<-function(wave, l=100){
       stimulations[[i]]<-stim.out
       baseline[i]<-mean(twitch[start+200:start+1000])
     }
-  return(list("twitch"=twitches, "stim"=stimulations, "baseline"=baseline))
+    
+    if(is.null(names)==TRUE){
+      return(list("twitch"=twitches, "stim"=stimulations, "baseline"=baseline))
+    } else {
+      return(list("twitch"=twitches, "stim"=stimulations, "baseline"=baseline, "names"=names))
+    }
 }
-
