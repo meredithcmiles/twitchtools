@@ -1,9 +1,4 @@
-# scans a wav file (in tuneR's Wave format) for pulse trains
-# for now, only works with 2-channel files
-# must contain the stimulation in one channel and the response in another
-# uses the stimulation as basis for extraction
-
-findTrains<-function(wave, l=100, names=NULL){
+findTrains<-function(wave, names=NULL, len=10000){
   twitch=wave@left
   samp.rate<-wave@samp.rate
     stim=wave@right
@@ -21,31 +16,35 @@ findTrains<-function(wave, l=100, names=NULL){
     smooth.out<-matrix(c(samples, time, stim.smooth), nrow=length(stim.smooth), ncol=3, dimnames=list(NULL, c("samples", "sec", "stim")))
     
     
-    stimpeaks<-findpeaks(smooth.out[,3], minpeakheight=0.5, minpeakdistance=100)
+    trainpeaks<-findpeaks(smooth.out[,3], minpeakheight=0.5, minpeakdistance=100)
+    stimpeaks<-findpeaks(smooth.out[,3], minpeakheight=0.5, minpeakdistance=10)
     
-    ntrains<-nrow(stimpeaks)
+    t.next<-c(stimpeaks[2:(nrow(stimpeaks)),2], NA)
+    stim.int<-t.next-stimpeaks[,2]
     
-    train.start<-smooth.out[stimpeaks[,3]-10,1] # get start point for trains in original sample units
-    train.end<-smooth.out[stimpeaks[,4]+l,1] # get endpoint for trains in original sample units
+    ntrains<-nrow(trainpeaks)
     
-    twitches<-vector(mode="list", length=ntrains)
-    stimulations<-vector(mode="list", length=ntrains)
-    baseline<-vector(mode="numeric", length=ntrains)
+    train.start<-smooth.out[trainpeaks[,3],1]-500 # get start point for trains in original sample units
+    train.end<-train.start+len # get endpoint for trains in original sample units
+    
+    train.start[train.start<0]<-0
+    train.end[train.end>length(twitch)]<-length(twitch)
+
+    trains<-vector(mode="list", length=ntrains)
     
     for (i in 1:ntrains){
       start<-train.start[i]
       end<-train.end[i]
       twitch.out<-twitch[start:end]
       stim.out<-stim[start:end]
+      name<-names[i]
       
-      twitches[[i]]<-twitch.out
-      stimulations[[i]]<-stim.out
-      baseline[i]<-mean(twitch[start+200:start+1000])
+      
+      if(is.null(names)==TRUE){
+        trains[[i]]<-list("twitch"=twitch.out, "stim"=stim.out)
+      } else {
+        trains[[i]]<-list("twitch"=twitch.out, "stim"=stim.out, "name"=name)
+      }
     }
-    
-    if(is.null(names)==TRUE){
-      return(list("twitch"=twitches, "stim"=stimulations, "baseline"=baseline))
-    } else {
-      return(list("twitch"=twitches, "stim"=stimulations, "baseline"=baseline, "names"=names))
-    }
+   return(trains) 
 }
