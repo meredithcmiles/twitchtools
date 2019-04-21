@@ -1,32 +1,50 @@
 # called externally to get percent relaxation for a single train
 # called internally for batch processing in percentRelax
 
-calcRelax<-function(train, peakdist){
+calcRelax<-function(train, thresh, peakdist, samp.rate=8000){
 
   twitch<-train$twitch
   stim<-train$stim
   name<-train$name
   
-  peaks<-getPeaks(twitch, peakdist, plot=FALSE)
+  hairy<-paste("hawo", c(1:12), sep="")
+  downy<-paste("dowo", c(1:12), sep="")
+  accel<-c(hairy, downy)
+  
+  peaks<-getPeaks(train, thresh, peakdist)
   peakset<-peaks$peaks
   valleyset<-peaks$valleys
 
+  last.val<-max(valleyset[,2])
+  valleyset<-valleyset[1:nrow(peakset),]
   npeaks<-nrow(peakset)
   
   valley0<-valleyset[1:npeaks-1,2]
   valleyf<-valleyset[2:npeaks,2]
+  valleyspan<-valleyf-valley0
+  blspan<-mean(valleyspan)
   
-  blspan<-quantile(valleyf-valley0, probs=.8)
+  bl1.end<-min(valley0)-(blspan/3)
+  bl1.start<-bl1.end-(blspan/2)
+  bl1.start[bl1.start<1]<-1
+  if(bl1.start==1){
+    bl1.end<-blspan/2
+  }
   
-  bl1.start<-blspan-blspan/2
-  bl1.end<-blspan+blspan/2
+  bl2.start<-last.val+blspan
+  bl2.end<-bl2.start+(blspan/2)
   
-  bl2.start<-max(peakset[,2]+blspan)
-  bl2.end<-bl2.start+blspan
+  bl1<-mean(twitch[bl1.start:bl1.end])
+  bl2<-mean(twitch[bl2.start:bl2.end])
+  
+  if(name %in% accel==TRUE && nrow(valleyset)>19){
+    valleyset<-valleyset[1:19,]
+    peakset<-peakset[1:19,]
+  }
   
   baseline<-seq(bl1, bl2, length.out = nrow(peakset))
   
-  t.stim<-findStim(stim)[,2]
+  t.stim<-findStim(stim)
   t.stim<-t.stim[order(t.stim)]/samp.rate
   t.peak<-peakset[,2]/samp.rate
   t.valley<-valleyset[,2]/samp.rate
@@ -34,7 +52,7 @@ calcRelax<-function(train, peakdist){
   if(length(t.stim)!=length(t.valley)){
     t.stim<-t.stim[1:length(t.valley)]
   }
-  
+
   peak.amp<-peakset[,1]
   valley.amp<-valleyset[,1]
   
