@@ -1,7 +1,7 @@
 # batch plotting for multiple trains
 # will eventually be integrated in one plotting function
 
-trainPlots<-function(trains){
+trainPlots<-function(trains, ...){
   n<-length(trains)
   plotme<-1:n
   
@@ -28,6 +28,7 @@ trainPlots<-function(trains){
   }
   
   for (i in 1:length(plotme)){
-    trainPlot(trains[[i]])
+    t<-plotme[i]
+    trainPlot(trains[[t]], line=TRUE, ...)
   }
 }
