@@ -4,5 +4,6 @@
 findStim<-function(stim){
   thresh<-min(stim)+(max(stim)-min(stim))/2
   stimpeaks<-findpeaks(stim, minpeakheight=0.5, minpeakdistance=100)
-  return(stimpeaks)
+  t.stim<-stimpeaks[,2]
+  return(t.stim[order(t.stim)])
 }
