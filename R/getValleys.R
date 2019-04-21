@@ -1,8 +1,6 @@
-# internal function call
-# extract valleys from muscle twitch train
-
 getValleys<-function(train, mode="findpeaks", thresh=1.25, peakdist=225){
   stim<-train$stim
+  twitch<-train$twitch
   t.stim<-findStim(stim)
   n<-length(t.stim)
   stim0<-min(t.stim)
@@ -16,8 +14,9 @@ getValleys<-function(train, mode="findpeaks", thresh=1.25, peakdist=225){
     
     for(i in 1:n){
       slice<-twitch[window.start[i]:window.end[i]]
+      t.slice<-1:length(slice)+window.start[i]
       valleyset[i,1]<-min(slice)
-      valleyset[i,2]<-which(slice==min(slice))+window.start[i]
+      valleyset[i,2]<-t.slice[which(slice==min(slice))]
     }
   } else if (mode=="findpeaks"){
     twitch.inv<-train$twitch*-1
