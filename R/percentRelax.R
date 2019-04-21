@@ -1,15 +1,17 @@
 # calculates percent relaxation for a batch of twitch trains
 
-percentRelax<-function(wave, trains, peakdist=220, ntrains=length(trains)){
-
-  samp.rate<-wave@samp.rate
+percentRelax<-function(trains, ntrains=length(trains), samp.rate=8000, ...){
   
   for(i in 1:ntrains){
-    train<-trains[[i]]$twitch
-    stim<-trains[[i]]$stim
-    name<-trains[[i]]$name
+    train<-trains[[i]]
     
-    train.out<-calcRelax(train, stim, name)
+    if(length(peakdist)>1){
+      dist<-peakdist[i]
+    } else {
+      dist<-peakdist
+    }
+    
+    train.out<-calcRelax(train, ...)
     
     if(i==1){
       output<-train.out
