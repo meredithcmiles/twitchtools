@@ -92,7 +92,7 @@ findTrains<-function(wave, names=NULL, len=13000){
     train.start[train.start<0]<-0
     train.end[train.end>length(twitch)]<-length(twitch)
 
-    trains<-vector(mode="list", length=ntrains)
+    trains.out<-vector(mode="list", length=ntrains)
     
     for (i in 1:ntrains){
       start<-train.start[i]
