@@ -2,18 +2,24 @@ trainPlot<-function(train, line=FALSE, ...){
   twitch<-train$twitch
   stim<-train$stim
   name<-train$name
-  hairy<-paste("hawo", c(1:12), sep="")
-  downy<-paste("dowo", c(1:12), sep="")
-  accel<-c(hairy, downy)
   peaks<-getPeaks(train=train, ...)
   peakset<-peaks$peaks
   valleyset<-peaks$valleys
   baseline<-peaks$baseline$moving
   
+  npeaks<-nrow(peakset)
+  valley0<-valleyset[1:npeaks-1,2]
+  valleyf<-valleyset[2:npeaks,2]
+  valleyspan<-valleyf-valley0
+  blspan<-mean(valleyspan)
+  
   bl1.start<-peaks$baseline$bl1[1]
   bl1.end<-peaks$baseline$bl1[2]
   bl2.start<-peaks$baseline$bl2[1]
   bl2.end<-peaks$baseline$bl2[2]
+  
+  bl1<-mean(peaks$baseline$bl1[3:4])
+  bl2<-mean(peaks$baseline$bl2[3:4])
   
   blcol<-rgb(225/255,226/255,96/255,.5)
   xleft<-c(bl1.start, bl2.start)
